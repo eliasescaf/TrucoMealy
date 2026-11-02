@@ -1,69 +1,79 @@
-import Image from "next/image";
+"use client";
+import { useMealy } from "../hooks/useMealy";
 
-export default function Home() {
+export default function TrucoValidator() {
+  const { currentState, outputs, history, sendInput, reset, getAvailableInputs } =
+    useMealy();
+  const availableInputs = getAvailableInputs();
+
+  const allInputs = ["E", "RE", "FE", "T", "RT", "V4", "Q", "NQ"];
+
+  const labels: Record<string, string> = {
+      E: 'Envido', RE: 'Real Envido', FE: 'Falta Envido',
+      T: 'Truco', RT: 'Retruco', V4: 'Vale 4',
+      Q: 'Quiero', NQ: 'No Quiero'
+    };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className="min-h-screen bg-emerald-950 text-zinc-50 flex flex-col items-center justify-center p-8 font-mono">
+      <div className="w-full max-w-md border border-zinc-800 bg-emerald-900 rounded-xl p-6 shadow-2xl">
+        <h1 className="text-xl font-bold mb-4 text-zinc-200 tracking-tight">
+          ¿Cuántos puntos son?
+        </h1>
+
+        <div className="mb-6 space-y-2 p-4 bg-emerald-950 border border-zinc-800 rounded-lg">
+          <p className="text-sm text-zinc-400">
+            Estado actual:{" "}
+            <span className="text-zinc-100 font-bold">{currentState}</span>
           </p>
+          <p className="text-sm text-zinc-400">
+            Salidas:{" "}
+            <span className="text-zinc-100 font-bold">
+              [{outputs.join(", ")}]
+            </span>
+          </p>
+
+          <div className="pt-2 mt-2 border-t border-zinc-800">
+            <p className="text-xs text-zinc-500 mb-1">Historial de Cantos:</p>
+            <div className="flex flex-wrap gap-2">
+              {history.length === 0 ? (
+                <span className="text-xs text-zinc-600">
+                  Esperando jugada...
+                </span>
+              ) : (
+                history.map((canto, index) => (
+                  <span
+                    key={index}
+                    className="text-xs bg-emerald-800 text-zinc-300 px-2 py-1 rounded-md border border-zinc-700"
+                  >
+                    {labels[canto]}
+                  </span>
+                ))
+              )}
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          {allInputs.map((btn) => (
+            <button
+              key={btn}
+              onClick={() => sendInput(btn as any)}
+              disabled={!availableInputs.includes(btn as any)}
+              className="px-4 py-2 rounded-lg bg-emerald-800 text-zinc-300 font-medium disabled:opacity-20 disabled:cursor-not-allowed hover:bg-emerald-700 hover:text-white transition-all active:scale-95"
+            >
+              {labels[btn]}
+            </button>
+          ))}
         </div>
-      </main>
-    </div>
+
+        <button
+          onClick={reset}
+          className="w-full py-2 border border-zinc-800 text-zinc-400 rounded-lg text-sm hover:bg-emerald-800 hover:text-zinc-200 transition-colors"
+        >
+          Reiniciar máquina
+        </button>
+      </div>
+    </main>
   );
 }
